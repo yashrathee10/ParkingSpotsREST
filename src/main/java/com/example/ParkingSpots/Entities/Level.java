@@ -2,6 +2,7 @@ package com.example.ParkingSpots.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java .util.*;
 
 @Entity
 @Table(name = "PARKING_LEVEL")
@@ -10,6 +11,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@NamedEntityGraph(name = "level.slots" , attributeNodes = {@NamedAttributeNode("spotsList")})
 public class Level {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +28,7 @@ public class Level {
     private Integer availCarSpots;
     @Column(name = "AVAIL_BUS")
     private Integer availBusSpots;
+    @OneToMany
+    @JoinColumn(name = "LEVEL_ID", referencedColumnName = "ID")
+    private List<Spot> spotsList;
 }

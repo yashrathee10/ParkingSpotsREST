@@ -1,6 +1,8 @@
 package com.example.ParkingSpots.Entities;
 
+import com.example.ParkingSpots.AllDetails.VehicleDetails;
 import com.example.ParkingSpots.Enumerators.VehicleType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,4 +24,8 @@ public class Spot {
     private VehicleType slotType;
     @Column(name = "OCCUPIED")
     private Boolean occupied;
+    @OneToOne
+    @JsonIgnore
+    @JoinColumn(name = "ID", referencedColumnName = "VEHICLE_NO")
+    private Vehicle vehicle;
 }

@@ -77,43 +77,57 @@ public class ParkingServiceImpl implements ParkingService {
             return new Response("No Level is created", HttpStatus.BAD_REQUEST);
         }
         Vehicle vehicle = new Vehicle();
-
+        List<Spot> spots = spotRepository.findVacant(vehicleModel.getVehicleType());
+        Spot spot = spots.get(0);
+        spot.setOccupied(Boolean.TRUE);
+        spot = spotRepository.save(spot);
+        if(spot.getSlotType()== Bike) {
+            levelRepository.updateLevelBike(spot.getLevelId());
+        }
+        else if(spot.getSlotType()== Car) {
+            levelRepository.updateLevelCar(spot.getLevelId());
+        }
+        else if(spot.getSlotType()== Bus) {
+            levelRepository.updateLevelBus(spot.getLevelId());
+        }
         vehicle.setVehicleNO(vehicleModel.getVehicleNumber());
         vehicle.setVehicleType(vehicleModel.getVehicleType());
-        vehicle.setSlotID(changeOccupancyToTrue(vehicleModel.getVehicleType()));
+        vehicle.setSlotID(spot.getId());
+//        vehicle.setSlotID(changeOccupancyToTrue(vehicleModel.getVehicleType()));
         vehicle = vehicleRepository.save(vehicle);
+
         return new Response(VehicleModel.builder().vehicleNumber(vehicle.getVehicleNO()).vehicleType(vehicle.getVehicleType()).slotID(vehicle.getSlotID()).build());
     }
-    private Integer changeOccupancyToTrue(VehicleType vehicleType){
-        List<Spot> spots = spotRepository.findAll();
-        for(int i=0; i<spots.size(); i++){
-            Spot spot = spots.get(i);
-            if(spot.getSlotType().equals(vehicleType) && spot.getOccupied()==Boolean.FALSE){
-                spot.setOccupied(Boolean.TRUE);
-                changeAvailSpots(spot.getLevelId(),vehicleType);
-                spot = spotRepository.save(spot);
-                return spot.getId();
-            }
-        }
-        return null;
-    }
+//    private Integer changeOccupancyToTrue(VehicleType vehicleType){
+//        List<Spot> spots = spotRepository.findAll();
+//        for(int i=0; i<spots.size(); i++){
+//            Spot spot = spots.get(i);
+//            if(spot.getSlotType().equals(vehicleType) && spot.getOccupied()==Boolean.FALSE){
+//                spot.setOccupied(Boolean.TRUE);
+//                changeAvailSpots(spot.getLevelId(),vehicleType);
+//                spot = spotRepository.save(spot);
+//                return spot.getId();
+//            }
+//        }
+//        return null;
+//    }
 
-    private void changeAvailSpots(Integer id, VehicleType vehicleType){
-        List<Level> levels = levelRepository.findAll();
-        for(int i =0; i<levels.size(); i++){
-            Level level = levels.get(i);
-            if(level.getId()==id && vehicleType==Bike){
-                level.setAvailBikeSpots(level.getAvailBikeSpots()-1);
-            }
-            else if(level.getId()==id && vehicleType==Car){
-                level.setAvailCarSpots(level.getAvailCarSpots()-1);
-            }
-            else if(level.getId()==id && vehicleType==Bus){
-                level.setAvailBusSpots(level.getAvailBusSpots()-1);
-            }
-            level = levelRepository.save(level);
-        }
-    }
+//    private void changeAvailSpots(Integer id, VehicleType vehicleType){
+//        List<Level> levels = levelRepository.findAll();
+//        for(int i =0; i<levels.size(); i++){
+//            Level level = levels.get(i);
+//            if(level.getId()==id && vehicleType==Bike){
+//                level.setAvailBikeSpots(level.getAvailBikeSpots()-1);
+//            }
+//            else if(level.getId()==id && vehicleType==Car){
+//                level.setAvailCarSpots(level.getAvailCarSpots()-1);
+//            }
+//            else if(level.getId()==id && vehicleType==Bus){
+//                level.setAvailBusSpots(level.getAvailBusSpots()-1);
+//            }
+//            level = levelRepository.save(level);
+//        }
+//    }
     @Override
     public Response<String> unpark(String vehicleNO) {
         if(!vehicleRepository.existsById(vehicleNO)){
@@ -142,8 +156,8 @@ public class ParkingServiceImpl implements ParkingService {
 
     }
     public List<Level> statis(){
-        List<Level> stats = levelRepository.findAll();
-        return stats;
+//        List<Level> stats = levelRepository.findAll();
+        return levelRepository.findAllLevels();
     }
 
     @Override
